@@ -22,10 +22,46 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+let Hooks = {}
+
+// Basic auto-scroll hook
+Hooks.AutoScroll = {
+  mounted() {
+    this.scrollToBottom()
+  },
+  
+  updated() {
+    this.scrollToBottom()
+  },
+  
+  scrollToBottom() {
+    this.el.scrollTop = this.el.scrollHeight
+  }
+}
+
+Hooks.EnterSubmit = {
+  mounted() {
+    this.el.addEventListener("keydown", (e) => {
+      if (e.key == "Enter" && e.shiftKey == false) {
+        e.preventDefault()
+        this.el.form.dispatchEvent(
+          new Event("submit", {bubbles: true, cancelable: true})
+        )
+      }
+    })
+  }
+}
+
+window.addEventListener(`phx:clear-textarea`, (e) => {
+  let el = document.getElementById(e.detail.id)
+  el.value = ""
+})
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: Hooks
 })
 
 // Show progress bar on live navigation and form submits
@@ -41,4 +77,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

@@ -1,0 +1,54 @@
+# Run `mix run priv/repo/seeds.exs` before sending these requests
+
+@host = http://localhost:4000
+@employee_user_id = 50
+@patient_user_id = 150
+
+
+# @name createSession
+POST {{ host }}/api/sessions/{{ patient_user_id }}
+
+@session_id = {{createSession.response.body.session_id}}
+
+### 
+# @name getSession
+GET {{ host }}/api/sessions/{{ session_id }}
+
+###
+# @name createMessage
+POST {{ host }}/api/sessions/{{ session_id }}/messages
+Content-Type: application/json
+
+{
+  "user_id": "{{ patient_user_id }}",
+  "content": "I have a fever."
+}
+
+###
+# @name listMessages
+GET {{ host }}/api/sessions/{{ session_id }}/messages
+
+###
+# @name createAssignment
+POST {{ host }}/api/sessions/{{ session_id }}/assignments
+Content-Type: application/json
+
+{
+  "user_id": "{{ employee_user_id }}"
+}
+
+###
+# @name listAssignments
+GET {{ host }}/api/sessions/{{ session_id }}/assignments
+
+###
+# @name makeEmployeeAvailable
+POST {{ host }}/api/employees/{{ employee_user_id }}/available
+
+###
+# @name makeEmployeeUnavailable
+POST {{ host }}/api/employees/{{ employee_user_id }}/unavailable
+
+###
+# @name getEmployeeStatus
+GET {{ host }}/api/employees/{{ employee_user_id }}/status

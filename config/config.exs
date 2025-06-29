@@ -9,7 +9,7 @@ import Config
 
 config :med_chat,
   ecto_repos: [MedChat.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime_usec]
 
 # Configures the endpoint
 config :med_chat, MedChatWeb.Endpoint,

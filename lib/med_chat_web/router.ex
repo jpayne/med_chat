@@ -18,12 +18,26 @@ defmodule MedChatWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/patient", PageController, :patient
+    get "/employee", PageController, :employee
+    live "/sessions/:token", ChatLive
+    live "/wait/:user_id", WaitLive
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", MedChatWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", MedChatWeb do
+    pipe_through :api
+
+    post "/sessions/:user_id", ChatApiController, :create_session
+    get "/sessions/:session_id", ChatApiController, :show_session
+    post "/sessions/:session_id/messages", ChatApiController, :create_message
+    get "/sessions/:session_id/messages", ChatApiController, :list_messages
+    post "/sessions/:session_id/assignments", ChatApiController, :create_assignment
+    get "/sessions/:session_id/assignments", ChatApiController, :list_assignments
+    post "/employees/:user_id/available", ChatApiController, :employee_available
+    post "/employees/:user_id/unavailable", ChatApiController, :employee_unavailable
+    get "/employees/:user_id/status", ChatApiController, :get_employee_status
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:med_chat, :dev_routes) do

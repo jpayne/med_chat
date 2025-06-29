@@ -2,20 +2,27 @@ defmodule MedChat.Chat.Assignment do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "chat_assignments" do
-    field :assigned_at, :utc_datetime
-    field :unassigned_at, :utc_datetime
+  schema "assignments" do
+    field :assigned_at, :utc_datetime_usec
+    field :unassigned_at, :utc_datetime_usec
 
-    belongs_to :chat_session, MedChat.Chat.Session
-    belongs_to :employee, MedChat.Account.User
+    belongs_to :session, MedChat.Chat.Session
+    belongs_to :user, MedChat.Account.User
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
-  @doc false
-  def changeset(assignment, attrs) do
+  def creation_changeset(assignment, attrs) do
     assignment
-    |> cast(attrs, [:assigned_at, :unassigned_at])
-    |> validate_required([:assigned_at, :unassigned_at])
+    |> cast(attrs, [:session_id, :user_id, :assigned_at])
+    |> validate_required([:session_id, :user_id, :assigned_at])
+    |> foreign_key_constraint(:session_id)
+    |> foreign_key_constraint(:user_id)
+  end
+
+  def unassigned_changeset(assignment, attrs) do
+    assignment
+    |> cast(attrs, [:unassigned_at])
+    |> validate_required([:unassigned_at])
   end
 end

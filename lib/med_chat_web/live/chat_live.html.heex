@@ -1,0 +1,78 @@
+<div class="flex justify-between mb-3 text-sm">
+  <div>Chat status: <strong><%= String.capitalize(Atom.to_string(@current_session.status)) %></strong></div>
+  <div>Session ID: <strong><%= @current_session.id %></strong></div>
+</div>
+
+<div
+  id="message-container"
+  class="h-96 max-h-96 overflow-y-auto flex flex-col p-4 border rounded"
+  phx-hook="AutoScroll"
+>
+  <div id="messages" phx-update="append">
+    <%= for message <- @messages do %>
+      <div id={"message-#{message.id}"} class={"mx-2 my-2 p-4 rounded #{message_class(message, @current_user)}"}>
+        <strong><%= user_name(message) %></strong>: <%= message.content %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<form
+  id="message-form"
+  class="mt-4"  
+  phx-submit="send_message"
+>
+  <div>    
+    <div class="relative mt-0.5 overflow-hidden rounded border border-gray-300 shadow-sm focus-within:ring focus-within:ring-blue-600">
+      <textarea
+        id="new_message"
+        name="new_message"
+        class="w-full resize-none border-none focus:ring-0 sm:text-md"
+        placeholder="Enter your message"
+        rows="4"
+        disabled={@current_session.status == :closed}
+        phx-hook="EnterSubmit"
+      ><%= @new_message %></textarea>
+
+      <div class="flex items-center justify-end gap-2 p-1.5">
+        <button
+          type="submit"
+          class="rounded border border-gray-300 px-3 py-1.5 text-md font-medium text-gray-900 shadow-sm transition-colors hover:bg-gray-100"
+        >
+          Send
+        </button>
+      </div>      
+    </div>
+  </div>
+  <div class="flex justify-between mt-3 mb-6 text-sm">
+    <div>Chatting as <strong><%= @current_user.name %></strong></div>
+  </div>
+</form>
+
+<div class="flex justify-between mb-3 text-sm">
+  <%= if @current_user.id == @current_session.employee_user_id do %>
+  <div phx-click="employee_unavailable">
+    <a class="rounded border border-red-600 px-3 py-3 text-md font-medium text-white shadow-sm transition-colors bg-red-500 hover:bg-red-800">
+      I'm Unavailable
+    </a>
+  </div>
+  <% end %>
+
+  <%= if @current_user.id == @current_session.patient_user_id do %>
+  <div phx-click="session_ended">
+    <a class="rounded border border-red-600 px-3 py-3 text-md font-medium text-white shadow-sm transition-colors bg-red-500 hover:bg-red-800">
+      End Session
+    </a>
+  </div>
+  <% end %>
+
+  <div phx-click="">
+    <a
+      class="rounded border border-blue-600 px-3 py-3 text-md font-medium text-white shadow-sm transition-colors bg-blue-500 hover:bg-blue-800"
+      href={@download_url}
+      download
+    >
+      Download Chat
+    </a>
+  </div>
+</div>
