@@ -48,20 +48,28 @@ defmodule MedChatWeb.ChatApiController do
       "content" => content
     })
   do
-    {:ok, message} = Chat.create_message(%{
+    case Chat.create_message(%{
       session_id: session_id,
       user_id: user_id,
       content: content
-    })
-
-    conn
-    |> put_status(:created)
-    |> json(%{
-      session_id: message.session_id,
-      message_id: message.id,
-      user_id: message.user_id,
-      content: message.content
-    })
+    }) do
+      {:ok, message} ->
+        conn
+        |> put_status(:created)
+        |> json(%{
+          session_id: message.session_id,
+          message_id: message.id,
+          user_id: message.user_id,
+          content: message.content,
+          length: String.length(content)
+        })
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{
+          error: changeset_errors_to_json(changeset)
+        })
+    end
   end
 
   def list_messages(conn, %{"session_id" => session_id}) do
@@ -194,5 +202,15 @@ defmodule MedChatWeb.ChatApiController do
         name: name
       }
     end
+  end
+
+  defp changeset_errors_to_json(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, &changeset_error_to_string/1)
+  end
+
+  defp changeset_error_to_string({msg, opts}) do
+    Enum.reduce(opts, msg, fn {key, value}, acc ->
+      String.replace(acc, "%{#{key}}", to_string(value))
+    end)
   end
 end
